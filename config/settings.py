@@ -23,14 +23,26 @@ DEBUG = os.getenv(
     "True"
 ).lower() == "true"
 
+
+# Render hostname + local hosts
+render_hostname = os.getenv(
+    "RENDER_EXTERNAL_HOSTNAME",
+    ""
+)
+
+allowed_hosts_env = os.getenv(
+    "ALLOWED_HOSTS",
+    "127.0.0.1,localhost"
+)
+
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv(
-        "ALLOWED_HOSTS",
-        "127.0.0.1,localhost"
-    ).split(",")
+    for host in allowed_hosts_env.split(",")
     if host.strip()
 ]
+
+if render_hostname and render_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_hostname)
 
 
 # =========================================================
@@ -58,6 +70,10 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+
+    # WhiteNoise - production static files
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -140,7 +156,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'Asia/Kolkata'
+TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
 
@@ -148,10 +164,10 @@ USE_TZ = True
 
 
 # =========================================================
-# STATIC
+# STATIC FILES
 # =========================================================
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -160,8 +176,23 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
+# WhiteNoise static file storage
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage."
+            "CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
+
+
 # =========================================================
-# MEDIA
+# MEDIA FILES
 # =========================================================
 
 MEDIA_URL = "/media/"
@@ -190,7 +221,7 @@ LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 
 # =========================================================
-# APPLICATION CONFIG
+# APPLICATION CONFIGURATION
 # =========================================================
 
 # Maximum uploaded dataset size
@@ -221,30 +252,53 @@ GEMINI_API_KEY = os.getenv(
 )
 
 
-# Gemini model can be changed from .env
-# without modifying Python code.
 GEMINI_MODEL = os.getenv(
     "GEMINI_MODEL",
-    "gemini-3.8-flash"
+    "gemini-3.5-flash-lite"
 )
+
+
+GEMINI_FALLBACK_MODEL = os.getenv(
+    "GEMINI_FALLBACK_MODEL",
+    "gemini-2.5-flash-lite"
+)
+
 
 # =========================================================
 # PRODUCTION SECURITY
 # =========================================================
 
 if not DEBUG:
+
+    # Render uses HTTPS externally
     SECURE_SSL_REDIRECT = True
 
+    # Tell Django that Render's proxy handles HTTPS
+    SECURE_PROXY_SSL_HEADER = (
+        "HTTP_X_FORWARDED_PROTO",
+        "https",
+    )
+
+    # Secure cookies
     SESSION_COOKIE_SECURE = True
+
     CSRF_COOKIE_SECURE = True
 
+    # Security headers
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
     X_FRAME_OPTIONS = "DENY"
 
     SECURE_REFERRER_POLICY = "same-origin"
 
+    # HSTS
     SECURE_HSTS_SECONDS = 31536000
+
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
     SECURE_HSTS_PRELOAD = True
 
+    # Render HTTPS domain allowed for POST/CSRF
+    CSRF_TRUSTED_ORIGINS = [
+        "https://ai-sql-data-analytics-assistant.onrender.com",
+    ]
