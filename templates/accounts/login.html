@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Login | SQL Analyst{% endblock %}
+
+{% block content %}
+
+<div class="auth-wrapper">
+
+    <div class="auth-card">
+
+        <div class="auth-logo">
+            AI
+        </div>
+
+        <h1>Welcome back</h1>
+
+        <p class="auth-subtitle">
+            Sign in to your AI Data Analyst workspace.
+        </p>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <label>Username</label>
+
+            <input
+                type="text"
+                name="username"
+                placeholder="Enter username"
+                required
+            >
+
+            <label>Password</label>
+
+            <input
+                type="password"
+                name="password"
+                placeholder="Enter password"
+                required
+            >
+
+            <button
+                type="submit"
+                class="primary-button"
+            >
+                Sign in
+            </button>
+
+        </form>
+
+        <p class="auth-footer">
+            Don't have an account?
+            <a href="{% url 'register' %}">
+                Create account
+            </a>
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

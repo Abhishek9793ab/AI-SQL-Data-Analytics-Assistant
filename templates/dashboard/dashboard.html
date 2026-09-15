@@ -1,0 +1,424 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Dashboard | AI SQL Data Analytics Assistant
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-logo">AI</div>
+
+            <div>
+                <strong>SQL Analyst</strong>
+                <span>AI Data Intelligence</span>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+
+            <div class="sidebar-label">
+                WORKSPACE
+            </div>
+
+            <a href="{% url 'dashboard' %}" class="sidebar-link active">
+                <span class="nav-icon">D</span>
+                Dashboard
+            </a>
+
+            <a href="{% url 'upload_dataset' %}" class="sidebar-link">
+                <span class="nav-icon">+</span>
+                Upload Dataset
+            </a>
+
+        </div>
+
+        <div class="sidebar-bottom">
+
+            <div class="ai-status">
+                <span class="status-dot"></span>
+
+                <div>
+                    <strong>AI Analyst</strong>
+                    <small>Ready to analyze</small>
+                </div>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="dashboard-content">
+
+        <!-- HEADER -->
+        <header class="dashboard-header">
+
+            <div>
+                <span class="eyebrow">
+                    ANALYTICS WORKSPACE
+                </span>
+
+                <h1>
+                    Welcome back, {{ user.username }}
+                </h1>
+
+                <p>
+                    Manage your datasets and analyze data using natural language.
+                </p>
+            </div>
+
+            <a
+                href="{% url 'upload_dataset' %}"
+                class="primary-button"
+            >
+                + Upload Dataset
+            </a>
+
+        </header>
+
+
+        <!-- STATS -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    DS
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        TOTAL DATASETS
+                    </span>
+
+                    <strong>
+                        {{ total_datasets }}
+                    </strong>
+
+                    <small>
+                        Uploaded datasets
+                    </small>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon success">
+                    OK
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        READY
+                    </span>
+
+                    <strong>
+                        {{ ready_datasets }}
+                    </strong>
+
+                    <small>
+                        Ready for analysis
+                    </small>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon warning">
+                    ...
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        PROCESSING
+                    </span>
+
+                    <strong>
+                        {{ processing_datasets }}
+                    </strong>
+
+                    <small>
+                        Currently processing
+                    </small>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon danger">
+                    !
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        FAILED
+                    </span>
+
+                    <strong>
+                        {{ failed_datasets }}
+                    </strong>
+
+                    <small>
+                        Processing failed
+                    </small>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon purple">
+                    ROW
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        TOTAL ROWS
+                    </span>
+
+                    <strong>
+                        {{ total_rows }}
+                    </strong>
+
+                    <small>
+                        Across all datasets
+                    </small>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">
+                    COL
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        TOTAL COLUMNS
+                    </span>
+
+                    <strong>
+                        {{ total_columns }}
+                    </strong>
+
+                    <small>
+                        Across all datasets
+                    </small>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- DATASETS -->
+        <section class="datasets-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">
+                        DATA LIBRARY
+                    </span>
+
+                    <h2>
+                        Your Datasets
+                    </h2>
+
+                    <p>
+                        Select a dataset to view its details and start analysis.
+                    </p>
+                </div>
+
+                <a
+                    href="{% url 'upload_dataset' %}"
+                    class="secondary-button"
+                >
+                    + Add Dataset
+                </a>
+
+            </div>
+
+
+            {% if datasets %}
+
+                <div class="dataset-grid">
+
+                    {% for dataset in datasets %}
+
+                        <a
+                            href="{% url 'dataset_detail' dataset.id %}"
+                            class="dataset-card"
+                        >
+
+                            <div class="dataset-card-top">
+
+                                <div class="file-icon">
+                                    {{ dataset.file_type|upper }}
+                                </div>
+
+                                <span class="status-badge {{ dataset.status }}">
+                                    {{ dataset.status|title }}
+                                </span>
+
+                            </div>
+
+
+                            <div class="dataset-card-body">
+
+                                <h3>
+                                    {{ dataset.name }}
+                                </h3>
+
+                                <p class="filename">
+                                    {{ dataset.original_filename }}
+                                </p>
+
+                            </div>
+
+
+                            <div class="dataset-meta">
+
+                                <div>
+                                    <strong>
+                                        {{ dataset.rows }}
+                                    </strong>
+                                    <span>Rows</span>
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        {{ dataset.columns }}
+                                    </strong>
+                                    <span>Columns</span>
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        {{ dataset.file_type|upper }}
+                                    </strong>
+                                    <span>Format</span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="dataset-footer">
+
+                                <span>
+                                    View dataset
+                                </span>
+
+                                <span class="arrow">
+                                    →
+                                </span>
+
+                            </div>
+
+                        </a>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        +
+                    </div>
+
+                    <h2>
+                        Start with your first dataset
+                    </h2>
+
+                    <p>
+                        Upload a CSV, Excel or JSON file and start
+                        exploring your data with AI.
+                    </p>
+
+                    <a
+                        href="{% url 'upload_dataset' %}"
+                        class="primary-button"
+                    >
+                        Upload Dataset
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- QUICK INFO -->
+        <section class="info-grid">
+
+            <div class="info-card">
+
+                <div class="info-icon">
+                    AI
+                </div>
+
+                <div>
+                    <h3>
+                        Ask questions in plain English
+                    </h3>
+
+                    <p>
+                        Turn natural-language questions into SQL queries
+                        and get instant data insights.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <div class="info-icon">
+                    SQL
+                </div>
+
+                <div>
+                    <h3>
+                        Safe SQL Analytics
+                    </h3>
+
+                    <p>
+                        Analyze your uploaded datasets using controlled
+                        and validated SQL execution.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Django
+*.log
+db.sqlite3
+staticfiles/
+
+# Environment
+.env
+
+# User uploaded data
+media/datasets/*
+!media/datasets/.gitkeep
+
+# Generated data
+data/raw/*
+data/processed/*
+data/exports/*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

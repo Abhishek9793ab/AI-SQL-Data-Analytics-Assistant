@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+AI SQL Analyst - {{ dataset.name }}
+{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/analyst.css' %}?v=3">
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="analyst-page">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+    <aside class="analyst-sidebar">
+
+        <div class="sidebar-header">
+            <div class="ai-logo">AI</div>
+
+            <div>
+                <h2>SQL Analyst</h2>
+                <span>AI Data Intelligence</span>
+            </div>
+        </div>
+
+        <!-- New Analysis -->
+        <button type="button" class="new-analysis-button" id="newAnalysisButton">
+            <span>＋</span>
+            <span>New Analysis</span>
+        </button>
+
+        <!-- Dataset -->
+        <div class="dataset-mini-card">
+
+            <span class="mini-label">ACTIVE DATASET</span>
+
+            <h3>{{ dataset.name }}</h3>
+
+            <div class="dataset-meta">
+                <span>{{ dataset.rows }} rows</span>
+                <span>{{ dataset.columns }} columns</span>
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             QUERY HISTORY
+        ================================================== -->
+
+        <div class="history-section">
+
+            <div class="history-header">
+
+                <div>
+                    <span class="history-label">QUERY HISTORY</span>
+                </div>
+
+                <button
+                    type="button"
+                    id="refreshHistoryButton"
+                    class="history-refresh"
+                    title="Refresh history"
+                >
+                    ↻
+                </button>
+
+            </div>
+
+            <div
+                id="conversationHistory"
+                class="conversation-history"
+            >
+
+                <div class="history-loading">
+                    Loading history...
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SCHEMA
+        ================================================== -->
+
+        <div class="schema-sidebar">
+
+            <div class="schema-title">
+                Dataset schema
+            </div>
+
+            {% for column in columns %}
+
+                <div class="schema-item">
+
+                    <span class="schema-column">
+                        {{ column.database_name }}
+                    </span>
+
+                    <span class="schema-type">
+                        {{ column.data_type }}
+                    </span>
+
+                </div>
+
+            {% empty %}
+
+                <div class="schema-empty">
+                    No columns available
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- Back -->
+        <a
+            href="/datasets/{{ dataset.id }}/"
+            class="back-button"
+        >
+            ← Back to Dataset
+        </a>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="analyst-main">
+
+        <!-- Topbar -->
+        <div class="analyst-topbar">
+
+            <div>
+
+                <span class="eyebrow">
+                    AI DATA ANALYSIS
+                </span>
+
+                <h1>
+                    Ask your data
+                </h1>
+
+                <p>
+                    Ask questions in plain English and get SQL,
+                    results, charts and AI insights.
+                </p>
+
+            </div>
+
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                AI Engine Ready
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             QUESTION CARD
+        ================================================== -->
+
+        <section class="question-card">
+
+            <div class="question-icon">
+                ✦
+            </div>
+
+            <div class="question-content">
+
+                <label for="questionInput">
+                    What would you like to know?
+                </label>
+
+                <textarea
+                    id="questionInput"
+                    rows="4"
+                    maxlength="2000"
+                    placeholder="Example: Calculate the average salary for each department"
+                ></textarea>
+
+                <div class="question-footer">
+
+                    <span>
+                        Ask questions naturally • AI will generate SQL
+                    </span>
+
+                    <button
+                        type="button"
+                        id="askButton"
+                        class="ask-button"
+                    >
+
+                        <span id="askText">
+                            Ask AI
+                        </span>
+
+                        <span
+                            id="askLoader"
+                            class="button-loader"
+                            style="display:none;"
+                        ></span>
+
+                        <span class="arrow">
+                            →
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SUGGESTIONS
+        ================================================== -->
+
+        <section class="suggestion-section">
+
+            <span class="suggestion-label">
+                TRY A QUESTION
+            </span>
+
+            <div class="suggestions">
+
+                <button
+                    type="button"
+                    class="suggestion"
+                    data-question="Calculate the average salary for each department"
+                >
+                    Average salary by department
+                </button>
+
+                <button
+                    type="button"
+                    class="suggestion"
+                    data-question="Show employees with salary above 70000"
+                >
+                    Employees earning above 70000
+                </button>
+
+                <button
+                    type="button"
+                    class="suggestion"
+                    data-question="Count employees in each department"
+                >
+                    Employee count by department
+                </button>
+
+                <button
+                    type="button"
+                    class="suggestion"
+                    data-question="Show the highest salary"
+                >
+                    Highest salary
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             LOADING
+        ================================================== -->
+
+        <section
+            id="loadingPanel"
+            class="result-card loading-card"
+            style="display:none;"
+        >
+
+            <div class="loading-animation"></div>
+
+            <h3>
+                Analyzing your data...
+            </h3>
+
+            <p>
+                AI is generating SQL and processing the dataset.
+            </p>
+
+            <div class="pipeline-status">
+                <span>Understanding question</span>
+                <span>•</span>
+                <span>Generating SQL</span>
+                <span>•</span>
+                <span>Executing query</span>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ERROR
+        ================================================== -->
+
+        <section
+            id="errorPanel"
+            class="error-card"
+            style="display:none;"
+        >
+
+            <div class="error-icon">
+                !
+            </div>
+
+            <div>
+
+                <strong>
+                    Analysis failed
+                </strong>
+
+                <p id="errorMessage">
+                    Something went wrong.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             RESULTS
+        ================================================== -->
+
+        <section
+            id="resultPanel"
+            class="results"
+            style="display:none;"
+        >
+
+            <!-- Result header -->
+            <div class="result-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        ANALYSIS RESULT
+                    </span>
+
+                    <h2 id="resultTitle">
+                        Query Result
+                    </h2>
+
+                </div>
+
+                <div
+                    id="executionTime"
+                    class="execution-badge"
+                >
+                    0 ms
+                </div>
+
+            </div>
+
+
+            <!-- Chart -->
+            <div
+                id="chartContainer"
+                class="chart-card"
+                style="display:none;"
+            >
+
+                <div class="chart-card-header">
+
+                    <h3 id="chartTitle">
+                        Chart
+                    </h3>
+
+                </div>
+
+                <div class="chart-wrapper">
+
+                    <canvas id="resultChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- Data -->
+            <div class="data-card">
+
+                <div class="data-card-header">
+
+                    <h3>
+                        Query Results
+                    </h3>
+
+                    <span
+                        id="rowCount"
+                        class="row-count"
+                    >
+                        0 rows
+                    </span>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table id="resultTable">
+
+                        <thead></thead>
+
+                        <tbody></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- SQL -->
+            <details class="sql-card">
+
+                <summary>
+                    <span>
+                        Generated SQL
+                    </span>
+
+                    <span>
+                        ▾
+                    </span>
+                </summary>
+
+                <pre id="generatedSQL"></pre>
+
+            </details>
+
+
+            <!-- AI Explanation -->
+            <div class="explanation-card">
+
+                <div class="explanation-icon">
+                    ✦
+                </div>
+
+                <div>
+
+                    <span class="mini-label">
+                        AI INSIGHT
+                    </span>
+
+                    <p id="aiExplanation">
+                        No explanation available.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Follow up -->
+            <section
+                id="followupSection"
+                class="followup-section"
+                style="display:none;"
+            >
+
+                <span class="suggestion-label">
+                    FOLLOW-UP QUESTIONS
+                </span>
+
+                <div
+                    id="followupSuggestions"
+                    class="suggestions"
+                ></div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     ANALYST CONFIG
+========================================================== -->
+
+<script>
+
+    window.ANALYST_CONFIG = {
+        askUrl: "{% url 'chat:ask_question' dataset.id %}",
+        historyUrl: "{% url 'chat:conversation_history' dataset.id %}",
+        csrfToken: "{{ csrf_token }}",
+        datasetId: {{ dataset.id }},
+        conversationId: null
+    };
+
+</script>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js"
+></script>
+
+<script
+    src="{% static 'js/analyst.js' %}?v=4"
+></script>
+
+{% endblock content %}

@@ -1,0 +1,100 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+        AI SQL Data Analytics Assistant
+        {% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/style.css' %}"
+    >
+
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <a
+            href="{% url 'dashboard' %}"
+            class="brand"
+        >
+            <span class="brand-icon">AI</span>
+            <span>SQL Analyst</span>
+        </a>
+
+        <div class="nav-right">
+
+            {% if user.is_authenticated %}
+
+                <span class="user-name">
+                    {{ user.username }}
+                </span>
+
+                <a
+                    href="{% url 'logout' %}"
+                    class="nav-button"
+                >
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a
+                    href="{% url 'login' %}"
+                    class="nav-button"
+                >
+                    Login
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+    {% if messages %}
+
+        <div class="messages">
+
+            {% for message in messages %}
+
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+
+    {% block extra_js %}
+    {% endblock %}
+
+</body>
+</html>

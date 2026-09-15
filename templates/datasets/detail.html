@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+{{ dataset.name }} | SQL Analyst
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{% static 'css/dashboard.css' %}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-wrapper">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="page-header dataset-detail-header">
+
+        <div>
+
+            <span class="eyebrow">
+                DATASET
+            </span>
+
+            <h1>
+                {{ dataset.name }}
+            </h1>
+
+            <p>
+                {{ dataset.original_filename }}
+            </p>
+
+        </div>
+
+
+        <div>
+
+            {% if dataset.status == "ready" %}
+
+                <a
+                    href="{% url 'analytics:analyst' dataset.id %}"
+                    class="primary-button"
+                >
+                    Open AI Analyst
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DATASET STATS
+    ====================================================== -->
+
+    <div class="stats-grid">
+
+        <!-- ROWS -->
+
+        <div class="stat-card">
+
+            <div>
+
+                <span class="stat-label">
+                    ROWS
+                </span>
+
+                <strong>
+                    {{ dataset.rows }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- COLUMNS -->
+
+        <div class="stat-card">
+
+            <div>
+
+                <span class="stat-label">
+                    COLUMNS
+                </span>
+
+                <strong>
+                    {{ dataset.columns }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- MISSING CELLS -->
+
+        <div class="stat-card">
+
+            <div>
+
+                <span class="stat-label">
+                    MISSING CELLS
+                </span>
+
+                <strong>
+                    {{ profile.missing_cells|default:"0" }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- DUPLICATES -->
+
+        <div class="stat-card">
+
+            <div>
+
+                <span class="stat-label">
+                    DUPLICATES
+                </span>
+
+                <strong>
+                    {{ profile.duplicate_rows|default:"0" }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SCHEMA
+    ====================================================== -->
+
+    <div class="content-card">
+
+        <div class="card-heading">
+
+            <div>
+
+                <h2>
+                    Schema
+                </h2>
+
+                <p>
+                    Detected structure of your dataset.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            #
+                        </th>
+
+                        <th>
+                            Column
+                        </th>
+
+                        <th>
+                            Database field
+                        </th>
+
+                        <th>
+                            Type
+                        </th>
+
+                        <th>
+                            Nulls
+                        </th>
+
+                        <th>
+                            Unique
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for column in columns %}
+
+                        <tr>
+
+                            <td>
+                                {{ forloop.counter }}
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    {{ column.original_name }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                <code>
+                                    {{ column.database_name }}
+                                </code>
+
+                            </td>
+
+
+                            <td>
+                                {{ column.data_type }}
+                            </td>
+
+
+                            <td>
+                                {{ column.null_count }}
+                            </td>
+
+
+                            <td>
+                                {{ column.unique_values }}
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                style="text-align: center;"
+                            >
+                                No schema information available.
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Upload Dataset | SQL Analyst
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{% static 'css/dashboard.css' %}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-wrapper">
+
+    <div class="page-header">
+
+        <span class="eyebrow">
+            DATA INGESTION
+        </span>
+
+        <h1>
+            Upload your dataset
+        </h1>
+
+        <p>
+            Bring a CSV, Excel or JSON dataset into your
+            analytics workspace.
+        </p>
+
+    </div>
+
+
+    <div class="upload-card">
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            id="uploadForm"
+        >
+
+            {% csrf_token %}
+
+            <label
+                for="id_file"
+                class="drop-zone"
+                id="dropZone"
+            >
+
+                <div class="upload-icon">
+                    ↑
+                </div>
+
+                <h2>
+                    Drop your dataset here
+                </h2>
+
+                <p>
+                    or click to browse your computer
+                </p>
+
+                <span class="supported">
+                    CSV · XLSX · JSON · Max 50 MB
+                </span>
+
+                {{ form.file }}
+
+            </label>
+
+
+            {% if form.file.errors %}
+
+                <div class="form-errors">
+
+                    {% for error in form.file.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <div
+                class="selected-file"
+                id="selectedFile"
+            >
+                No file selected
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-button full-width"
+            >
+                Analyze dataset
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{% static 'js/upload.js' %}"></script>
+
+{% endblock %}
